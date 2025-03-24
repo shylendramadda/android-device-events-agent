@@ -34,9 +34,6 @@ This is an agent app to listen for the events and capture the logs from the andr
 
 6. To see the logs:
    ```sh
-adb logcat -s KeywordYouWant
-   ```
-   ```sh
     adb logcat -s EncryptionUtils
    ```
 

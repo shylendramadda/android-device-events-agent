@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/app_description"
+    android:accessibilityEventTypes="typeAllMask"
+    android:packageNames="com.opentext.androidtestapp"
+    android:accessibilityFeedbackType="feedbackAllMask"
+    android:notificationTimeout="100"
+    android:accessibilityFlags="flagDefault"
+    android:canRetrieveWindowContent="true"
+    android:canRequestTouchExplorationMode="true"
+    android:settingsActivity="com.opentext.androidagent.AgentAccessibilitySettingsActivity"/>
+
+    <!--   Use this to track only specific app android:packageNames="com.opentext.androidtestapp"-->
+    <!-- Keep * as android:packageNames="*" to listen for all apps -->

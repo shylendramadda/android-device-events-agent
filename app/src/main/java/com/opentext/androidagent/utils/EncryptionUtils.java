@@ -33,7 +33,7 @@ public class EncryptionUtils {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, getSecretKey(), getIv());
         byte[] encryptedBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT);
+        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP);
     }
 
     public static void saveEncryptedEvent(String eventType, String details, File file) {
@@ -61,7 +61,7 @@ public class EncryptionUtils {
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, getSecretKey(), getIv());
-            byte[] decodedBytes = Base64.decode(encryptedData, Base64.DEFAULT);
+            byte[] decodedBytes = Base64.decode(encryptedData, Base64.NO_WRAP);
             return new String(cipher.doFinal(decodedBytes), StandardCharsets.UTF_8);
         } catch (Exception e) {
             Log.e(TAG, "Error decrypting data: ", e);

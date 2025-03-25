@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">AndroidAgent</string>
-    <string name="app_description">This is an agent app to listen for system events</string>
+    <string name="app_description">This is an agent app to listen and track the system events</string>
 </resources>

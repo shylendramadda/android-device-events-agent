@@ -40,6 +40,10 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+        <service
+            android:name=".services.EventLoggerService"
+            android:foregroundServiceType="dataSync"/>
+
         <receiver
             android:name=".receivers.SystemEventReceiver"
             android:enabled="true"

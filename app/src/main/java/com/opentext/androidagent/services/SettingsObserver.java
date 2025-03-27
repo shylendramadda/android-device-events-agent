@@ -8,8 +8,8 @@ import android.util.Log;
 
 public class SettingsObserver extends ContentObserver {
 
-    private static final String TAG = "OpenTextAgent";
-    private Context context;
+    private static final String TAG = "SettingsObserver";
+    private final Context context;
 
     public SettingsObserver(Handler handler, Context context) {
         super(handler);

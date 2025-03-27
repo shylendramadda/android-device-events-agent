@@ -6,9 +6,15 @@
     android:accessibilityFeedbackType="feedbackAllMask"
     android:notificationTimeout="100"
     android:accessibilityFlags="flagDefault"
-    android:canRetrieveWindowContent="true"
+    android:canRetrieveWindowContent="false"
     android:canRequestTouchExplorationMode="true"
     android:settingsActivity="com.opentext.androidagent.AgentAccessibilitySettingsActivity"/>
 
-    <!--   Use this to track only specific app android:packageNames="com.opentext.androidtestapp"-->
+    <!-- Use this to track only specific app android:packageNames="com.opentext.androidtestapp"-->
     <!-- Keep * as android:packageNames="*" to listen for all apps -->
+    <!-- android:accessibilityEventTypes="typeAllMask" – Listens for all event types. -->
+
+    <!--Optimization:-->
+    <!-- android:accessibilityEventTypes="typeViewClicked|typeViewFocused|typeViewLongClicked|typeViewSelected|typeViewTextChanged|typeWindowStateChanged" – Listens for specific event types-->
+    <!-- android:notificationTimeout="200" – Reduces event frequency (default = 0).
+    android:canRetrieveWindowContent="false" – Avoids unnecessary UI tree processing.-->

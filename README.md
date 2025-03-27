@@ -87,3 +87,8 @@ This is an agent app to listen for the events and capture the logs from the andr
     ```sh
     adb pull /sdcard/screen_video.mp4
     ```
+    
+17. To delete the log file:
+    ```sh
+    adb shell rm /sdcard/Android/data/com.opentext.androidagent/files/events_log.json
+    ```

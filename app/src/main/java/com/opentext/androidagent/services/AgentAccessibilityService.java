@@ -2,7 +2,9 @@ package com.opentext.androidagent.services;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Handler;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -14,7 +16,31 @@ public class AgentAccessibilityService extends AccessibilityService {
 
     private static final String TAG = "OpenTextAgent";
     private static final String logFileName = "events_log.json";
-    File file;
+    private SettingsObserver settingsObserver;
+    File eventFile;
+    Intent serviceIntent;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        serviceIntent = new Intent(this, EventLoggerService.class);
+        settingsObserver = new SettingsObserver(new Handler(), this);
+        settingsObserver.registerObserver();
+        addEvent(TAG, "settingsObserver registered");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (settingsObserver != null) {
+            settingsObserver.unregisterObserver();
+            addEvent(TAG, "unregisterObserver called");
+        }
+        if (serviceIntent != null) {
+            stopService(serviceIntent);
+            addEvent(TAG, "stopService called");
+        }
+    }
 
     @Override
     protected void onServiceConnected() {
@@ -25,8 +51,8 @@ public class AgentAccessibilityService extends AccessibilityService {
         info.flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
         info.notificationTimeout = 100;
         setServiceInfo(info);
-        file = new File(getExternalFilesDir(null), logFileName);
-        saveEventToFile("onServiceConnected", "Accessibility Service Connected");
+        eventFile = new File(getExternalFilesDir(null), logFileName);
+        addEvent("onServiceConnected", "Accessibility Service Connected");
     }
 
     @Override
@@ -34,41 +60,42 @@ public class AgentAccessibilityService extends AccessibilityService {
         int eventType = event.getEventType();
         String eventText = event.getText().toString();
         String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "Unknown";
-        saveEventToFile("onAccessibilityEvent", "Event received: " + eventType);
+        addEvent("onAccessibilityEvent", "Event received: " + eventType);
 
         switch (eventType) {
             case AccessibilityEvent.TYPE_VIEW_CLICKED:
-                saveEventToFile("View Clicked:", eventText);
+                addEvent("View Clicked:", eventText);
                 break;
             case AccessibilityEvent.TYPE_VIEW_LONG_CLICKED:
-                saveEventToFile("Long Clicked:", eventText);
+                addEvent("Long Clicked:", eventText);
                 break;
             case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                saveEventToFile("App Launched or Window Changed:", packageName);
+                addEvent("App Launched or Window Changed:", packageName);
                 break;
             case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-                saveEventToFile("View Focused:", eventText);
+                addEvent("View Focused:", eventText);
                 break;
             case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
-                saveEventToFile("Text Changed:", eventText);
+                addEvent("Text Changed:", eventText);
                 break;
             case AccessibilityEvent.TYPE_VIEW_SCROLLED:
-                saveEventToFile("View Scrolled", "");
+                addEvent("View Scrolled", "");
                 break;
             case AccessibilityEvent.TYPE_GESTURE_DETECTION_START:
-                saveEventToFile("Gesture Detected", "");
+                addEvent("Gesture Detected", "");
                 break;
             case AccessibilityEvent.TYPE_TOUCH_INTERACTION_START:
-                saveEventToFile("Touch Started", "");
+                addEvent("Touch Started", "");
                 break;
             case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
-                saveEventToFile("Touch Ended", "");
+                addEvent("Touch Ended", "");
                 break;
             case AccessibilityEvent.TYPE_WINDOWS_CHANGED:
-                saveEventToFile("System Dialog Opened", "");
+                addEvent("System Dialog Opened", "");
                 break;
             default:
-                saveEventToFile("Event received: ", String.valueOf(eventType));
+                // Ignore all other events to save CPU cycles
+                // Reduces the number of processed events, lowering CPU/memory usage.
         }
     }
 
@@ -76,18 +103,19 @@ public class AgentAccessibilityService extends AccessibilityService {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         String orientation = newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? "LANDSCAPE" : "PORTRAIT";
-        saveEventToFile("onConfigurationChanged", "Screen rotated: " + orientation);
+        addEvent("onConfigurationChanged", "Screen rotated: " + orientation);
     }
 
     @Override
     public void onInterrupt() {
-        saveEventToFile("onInterrupt", "Accessibility Service Interrupted");
+        addEvent("onInterrupt", "Accessibility Service Interrupted");
     }
 
-    private void saveEventToFile(String eventType, String details) {
+    private void addEvent(String eventType, String details) {
         try {
-            Log.d(TAG, "Saving event to file at path: " + file.getAbsolutePath());
-            EncryptionUtils.saveEncryptedEvent(eventType, details, file);
+            Log.d(TAG, "Saving event to file at path: " + eventFile.getAbsolutePath());
+            EncryptionUtils.addEventToBuffer(eventType, details, eventFile);
+            startService(serviceIntent);
             // Uncomment below code to encrypt the file
             /* FileEncryptionUtils.saveEncryptedFile("This is a test log event", file);
             FileEncryptionUtils.readEncryptedFile(file);*/
